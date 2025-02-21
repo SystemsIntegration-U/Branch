@@ -1,0 +1,82 @@
+services:
+  # Servicio de Consul (opcional, si usas Consul para descubrimiento/configuración)
+  consul:
+    image: consul:1.15
+    container_name: consul
+    ports:
+      - "8500:8500"
+    command: agent -dev -client=0.0.0.0
+    networks:
+      - branch-net
+
+  # Sucursal 1
+  branch1:
+    build: .
+    container_name: branch1
+    environment:
+      - SPRING_APPLICATION_NAME=branch-service-1
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://branch1-db:5432/branch1_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SERVER_PORT=8081
+    ports:
+      - "8081:8081"
+    depends_on:
+      - branch1-db
+      - consul
+    networks:
+      - branch-net
+
+  branch1-db:
+    image: postgres:latest
+    container_name: branch1-db
+    environment:
+      - POSTGRES_DB=branch1_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5433:5432"  # Puerto externo, opcional si deseas conectarte externamente
+    volumes:
+      - branch1-data:/var/lib/postgresql/data
+    networks:
+      - branch-net
+
+  # Sucursal 2
+  branch2:
+    build: .
+    container_name: branch2
+    environment:
+      - SPRING_APPLICATION_NAME=branch-service-2
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://branch2-db:5432/branch2_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SERVER_PORT=8082
+    ports:
+      - "8082:8082"
+    depends_on:
+      - branch2-db
+      - consul
+    networks:
+      - branch-net
+
+  branch2-db:
+    image: postgres:latest
+    container_name: branch2-db
+    environment:
+      - POSTGRES_DB=branch2_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5434:5432"  # Puerto externo opcional
+    volumes:
+      - branch2-data:/var/lib/postgresql/data
+    networks:
+      - branch-net
+
+networks:
+  branch-net:
+    driver: bridge
+
+volumes:
+  branch1-data:
+  branch2-data:
