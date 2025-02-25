@@ -25,7 +25,7 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-amqp")
-//	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
 	compileOnly("org.projectlombok:lombok")
@@ -38,4 +38,25 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	val envFile = file(".env")
+	if (envFile.exists()) {
+		envFile.readLines()
+			.filter { it.isNotBlank() && !it.startsWith("#") }
+			.forEach { line ->
+				val (key, value) = line.split("=", limit = 2)
+				environment(key.trim(), value.trim().removeSurrounding("\""))
+			}
+	}
+}
+
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+	val envFile = file(".env")
+	if (envFile.exists()) {
+		envFile.readLines()
+			.filter { it.isNotBlank() && !it.startsWith("#") }
+			.forEach { line ->
+				val (key, value) = line.split("=", limit = 2)
+				environment(key.trim(), value.trim().removeSurrounding("\""))
+			}
+	}
 }
