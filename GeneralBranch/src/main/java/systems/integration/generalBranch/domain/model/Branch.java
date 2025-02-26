@@ -28,4 +28,7 @@ public class Branch implements IEntityBase {
 
     @Embedded
     private Location location;
+
+    @Column(name = "port", nullable = false)
+    private int port;
 }

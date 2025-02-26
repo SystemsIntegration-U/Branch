@@ -32,7 +32,7 @@ public abstract class GenericService<T, ID> implements IService<T, ID> {
     @Override
     public T update(ID id, T entity) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Entidad no encontrada con id: " + id);
+            throw new RuntimeException("Entity not found with id: " + id);
         }
         return repository.save(entity);
     }
