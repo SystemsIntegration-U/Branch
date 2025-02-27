@@ -35,4 +35,9 @@ public class MedicineController {
     public void deleteMedicine(@PathVariable UUID id) {
         medicineService.deleteMedicine(id);
     }
+
+    @PostMapping("/{id}/reduce-stock")
+    public Medicine reduceStock(@PathVariable UUID id, @RequestParam int quantity) {
+        return medicineService.reduceStock(id, quantity);
+    }
 }

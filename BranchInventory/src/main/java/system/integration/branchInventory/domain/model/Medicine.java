@@ -17,4 +17,7 @@ public class Medicine {
 
     @Column(nullable = false, unique = true)
     private String atc;
+
+    @Column(nullable = false)
+    private int stock;
 }

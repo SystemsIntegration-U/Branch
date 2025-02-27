@@ -13,10 +13,6 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
-
     @Column(nullable = false)
     private LocalDateTime reservationDate;
 
