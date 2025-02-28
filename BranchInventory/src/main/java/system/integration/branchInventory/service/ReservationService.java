@@ -28,17 +28,13 @@ public class ReservationService {
         this.batchRepository = batchRepository;
     }
 
-    /**
-     * Crea una nueva reserva en base a la solicitud recibida
-     */
     public Reservation createReservation(UUID medicineId, int requiredQuantity) {
         Reservation reservation = new Reservation();
         reservation.setReservationDate(LocalDateTime.now());
-        reservation.setExpiryDate(LocalDateTime.now().plusDays(3)); // Expira en 3 días
+        reservation.setExpiryDate(LocalDateTime.now().plusDays(3));
         reservation.setStatus("PENDING");
         reservation = reservationRepository.save(reservation);
 
-        // Obtener lotes disponibles ordenados por fecha de vencimiento (FIFO)
         List<Batch> availableBatches = batchRepository.findAll().stream()
                 .filter(batch -> batch.getMedicine().getId().equals(medicineId) && batch.getStock() > 0)
                 .sorted((b1, b2) -> b1.getExpiryDate().compareTo(b2.getExpiryDate()))
@@ -50,23 +46,18 @@ public class ReservationService {
             if (remainingQuantity <= 0) break;
             int reservedQty = Math.min(remainingQuantity, batch.getStock());
 
-            // Crear detalle de reserva
             ReservationDetail detail = new ReservationDetail();
             detail.setReservation(reservation);
             detail.setBatch(batch);
             detail.setQuantity(reservedQty);
             reservationDetailRepository.save(detail);
 
-            // Reducir la cantidad pendiente
             remainingQuantity -= reservedQty;
         }
 
         return reservation;
     }
 
-    /**
-     * Confirma una reserva y cambia su estado a "CONFIRMED"
-     */
     public void confirmReservation(UUID reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RuntimeException("Reservation not found"));
