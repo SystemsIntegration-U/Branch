@@ -1,8 +1,5 @@
 package system.integration.branchInventory.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.stereotype.Service;
 
 import system.integration.branchInventory.RabbitMQEventPublisher;
@@ -17,14 +14,11 @@ public class StockEventPublisher {
     }
 
     public void checkAndPublishStockEvent(Medicine medicine) {
-        if (medicine.getStock() == 10) {
-            Map<String, Object> eventData = new HashMap<>();
-            eventData.put("medicineId", medicine.getId());
-            eventData.put("atc", medicine.getAtc());
-            eventData.put("requiredQuantity", 10);
-
-            eventPublisher.sendEvent("low_stock_queue", eventData);
-        }
+        if (medicine.getStock() < 10) {
+            String event = String.format("Restock needed: %s has only %d units.", medicine.getName(), medicine.getStock());
+            eventPublisher.sendEvent("restock_queue", event);
+        }        
     }
 }
+
 

@@ -1,33 +1,77 @@
 package system.integration.branchInventory.service;
 
-import org.springframework.stereotype.Service;
-import system.integration.branchInventory.domain.model.Reservation;
-import system.integration.branchInventory.repository.IReservationRepository;
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
+import system.integration.branchInventory.domain.model.Batch;
+import system.integration.branchInventory.domain.model.Reservation;
+import system.integration.branchInventory.domain.model.ReservationDetail;
+import system.integration.branchInventory.repository.IBatchRepository;
+import system.integration.branchInventory.repository.IReservationDetailRepository;
+import system.integration.branchInventory.repository.IReservationRepository;
 
 @Service
 public class ReservationService {
     private final IReservationRepository reservationRepository;
+    private final IReservationDetailRepository reservationDetailRepository;
+    private final IBatchRepository batchRepository;
 
-    public ReservationService(IReservationRepository reservationRepository) {
+    public ReservationService(IReservationRepository reservationRepository,
+                              IReservationDetailRepository reservationDetailRepository,
+                              IBatchRepository batchRepository) {
         this.reservationRepository = reservationRepository;
+        this.reservationDetailRepository = reservationDetailRepository;
+        this.batchRepository = batchRepository;
     }
 
-    public List<Reservation> getAllReservations() {
-        return reservationRepository.findAll();
+    /**
+     * Crea una nueva reserva en base a la solicitud recibida
+     */
+    public Reservation createReservation(UUID medicineId, int requiredQuantity) {
+        Reservation reservation = new Reservation();
+        reservation.setReservationDate(LocalDateTime.now());
+        reservation.setExpiryDate(LocalDateTime.now().plusDays(3)); // Expira en 3 días
+        reservation.setStatus("PENDING");
+        reservation = reservationRepository.save(reservation);
+
+        // Obtener lotes disponibles ordenados por fecha de vencimiento (FIFO)
+        List<Batch> availableBatches = batchRepository.findAll().stream()
+                .filter(batch -> batch.getMedicine().getId().equals(medicineId) && batch.getStock() > 0)
+                .sorted((b1, b2) -> b1.getExpiryDate().compareTo(b2.getExpiryDate()))
+                .collect(Collectors.toList());
+
+        int remainingQuantity = requiredQuantity;
+
+        for (Batch batch : availableBatches) {
+            if (remainingQuantity <= 0) break;
+            int reservedQty = Math.min(remainingQuantity, batch.getStock());
+
+            // Crear detalle de reserva
+            ReservationDetail detail = new ReservationDetail();
+            detail.setReservation(reservation);
+            detail.setBatch(batch);
+            detail.setQuantity(reservedQty);
+            reservationDetailRepository.save(detail);
+
+            // Reducir la cantidad pendiente
+            remainingQuantity -= reservedQty;
+        }
+
+        return reservation;
     }
 
-    public Reservation getReservationById(UUID id) {
-        return reservationRepository.findById(id).orElse(null);
-    }
+    /**
+     * Confirma una reserva y cambia su estado a "CONFIRMED"
+     */
+    public void confirmReservation(UUID reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
 
-    public Reservation saveReservation(Reservation reservation) {
-        return reservationRepository.save(reservation);
-    }
-
-    public void deleteReservation(UUID id) {
-        reservationRepository.deleteById(id);
+        reservation.setStatus("CONFIRMED");
+        reservationRepository.save(reservation);
     }
 }

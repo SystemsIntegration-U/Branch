@@ -19,13 +19,27 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	// Spring Boot
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.springframework.boot:spring-boot-starter-amqp") // RabbitMQ
+
+	// PostgreSQL
 	runtimeOnly("org.postgresql:postgresql")
+
+	// Lombok
+	compileOnly("org.projectlombok:lombok:1.18.32")
+	annotationProcessor("org.projectlombok:lombok:1.18.32")
+
+	// Validación de datos
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+
+	// Serialización JSON
+	implementation("com.fasterxml.jackson.core:jackson-databind:2.15.3")
+
+	// Testing
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	compileOnly("org.projectlombok:lombok:1.18.32") 
-    annotationProcessor("org.projectlombok:lombok:1.18.32") 
 }
 
 tasks.withType<Test> {
