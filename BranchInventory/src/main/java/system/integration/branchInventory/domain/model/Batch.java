@@ -1,13 +1,18 @@
 package system.integration.branchInventory.domain.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.UUID;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "batch")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Batch {
 
     @Id

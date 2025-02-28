@@ -1,22 +1,29 @@
 package system.integration.branchInventory.service;
 
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 import system.integration.branchInventory.RabbitMQEventPublisher;
 import system.integration.branchInventory.domain.model.Medicine;
 import system.integration.branchInventory.repository.IMedicineRepository;
-import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.UUID;
 
 @Service
-public class MedicineService {
-    private final IMedicineRepository medicineRepository;
+public class MedicineService extends GenericService<Medicine, UUID> {
     private final RabbitMQEventPublisher eventPublisher;
+    private final BatchService batchService;
+    private final IMedicineRepository medicineRepository;
 
-    public MedicineService(IMedicineRepository medicineRepository, RabbitMQEventPublisher eventPublisher) {
-        this.medicineRepository = medicineRepository;
+    public MedicineService(IMedicineRepository medicineRepository,
+                           RabbitMQEventPublisher eventPublisher,
+                           BatchService batchService) {
+        super(medicineRepository);
+
         this.eventPublisher = eventPublisher;
+        this.batchService = batchService;
+        this.medicineRepository = medicineRepository;
     }
-
     public List<Medicine> getAllMedicines() {
         return medicineRepository.findAll();
     }
@@ -33,20 +40,34 @@ public class MedicineService {
         medicineRepository.deleteById(id);
     }
 
+    public void notifyGeoService(UUID medicineId, int neededQuantity) {
+        String request = String.format("Find alternative: Medicine ID %s needs %d units.", medicineId, neededQuantity);
+        eventPublisher.sendEvent("geo_location_queue", request);
+    }
+
     public Medicine reduceStock(UUID id, int quantity) {
-        Medicine medicine = medicineRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medicine not found"));
+        Medicine medicine = repository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Medicine not found"));
 
-        if (medicine.getStock() >= quantity) {
+        int availableStock = batchService.getAvailableStock(id);
+
+        if (availableStock >= quantity) {
             medicine.setStock(medicine.getStock() - quantity);
-            return medicineRepository.save(medicine);
+            repository.save(medicine);
+            return medicine;
         } else {
-
-            String message = String.format("Search petition : %s need %d units.",
-                    medicine.getName(), quantity - medicine.getStock());
-            eventPublisher.sendEvent("stock_request_queue", message);
-
+            notifyGeoService(id, quantity - availableStock);
             throw new RuntimeException("Insufficient stock. Searching for another branch.");
         }
     }
+    
+    public Medicine increaseStock(UUID id, int quantity) {
+        Medicine medicine = repository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Medicine not found"));
+
+        medicine.setStock(medicine.getStock() + quantity);
+        repository.save(medicine);
+        return medicine;
+    }
 }
+

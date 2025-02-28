@@ -2,6 +2,8 @@ package system.integration.branchInventory.domain.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.List;
 import java.util.UUID;
 import java.time.LocalDateTime;
 
@@ -13,12 +15,18 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(nullable = false)
     private LocalDateTime reservationDate;
-
-    @Column(nullable = false)
     private LocalDateTime expiryDate;
-
-    @Column(nullable = false)
     private String status;
+
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ReservationDetail> reservationDetails;  
+
+    public List<ReservationDetail> getReservationDetails() {
+        return reservationDetails;
+    }
+
+    public void setReservationDetails(List<ReservationDetail> reservationDetails) {
+        this.reservationDetails = reservationDetails;
+    }
 }
