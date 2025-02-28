@@ -19,6 +19,10 @@ public class StockEventPublisher {
             eventPublisher.sendEvent("restock_queue", event);
         }        
     }
+
+    public void sendEvent(String queue, String message) {
+        eventPublisher.sendEvent(queue, message);
+    }
 }
 
 
