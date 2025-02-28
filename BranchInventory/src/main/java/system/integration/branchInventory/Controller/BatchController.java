@@ -1,38 +1,46 @@
 package system.integration.branchInventory.Controller;
 
 import org.springframework.web.bind.annotation.*;
-import system.integration.branchInventory.domain.model.Batch;
+import system.integration.branchInventory.dto.BatchDTO;
+import system.integration.branchInventory.mappers.BatchMapper;
+import system.integration.branchInventory.repository.IMedicineRepository;
 import system.integration.branchInventory.service.BatchService;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/batch")
 public class BatchController {
-    private final BatchService batchService;
 
-    public BatchController(BatchService batchService) {
+    private final BatchService batchService;
+    private final BatchMapper batchMapper;
+
+    public BatchController(BatchService batchService, BatchMapper batchMapper, IMedicineRepository medicineRepository) {
         this.batchService = batchService;
+        this.batchMapper = batchMapper;
     }
 
     @GetMapping
-    public List<Batch> getAllBatches() {
-        return batchService.getAllBatches();
+    public List<BatchDTO> getAllBatches() {
+        return batchService.getAll().stream()
+                .map(batchMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public Batch getBatchById(@PathVariable UUID id) {
-        return batchService.getBatchById(id);
+    public BatchDTO getBatchById(@PathVariable UUID id) {
+        return batchMapper.toDTO(batchService.getById(id).orElse(null));
     }
 
     @PostMapping
-    public Batch createBatch(@RequestBody Batch batch) {
-        return batchService.saveBatch(batch);
+    public BatchDTO createBatch(@RequestBody BatchDTO batchDTO) {
+        return batchService.saveBatch(batchDTO);
     }
-
+    
     @DeleteMapping("/{id}")
     public void deleteBatch(@PathVariable UUID id) {
-        batchService.deleteBatch(id);
+        batchService.delete(id);
     }
 }

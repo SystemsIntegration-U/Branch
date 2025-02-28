@@ -1,51 +1,31 @@
 package system.integration.branchInventory.service;
 
-import system.integration.branchInventory.RabbitMQEventPublisher;
-import system.integration.branchInventory.domain.model.Medicine;
-import system.integration.branchInventory.repository.IMedicineRepository;
-import org.springframework.stereotype.Service;
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.stereotype.Service;
+import system.integration.branchInventory.domain.model.Medicine;
+import system.integration.branchInventory.repository.IMedicineRepository;
+
 @Service
-public class MedicineService {
-    private final IMedicineRepository medicineRepository;
-    private final RabbitMQEventPublisher eventPublisher;
+public class MedicineService extends GenericService<Medicine, UUID> {
+    private final StockEventPublisher stockEventPublisher;
 
-    public MedicineService(IMedicineRepository medicineRepository, RabbitMQEventPublisher eventPublisher) {
-        this.medicineRepository = medicineRepository;
-        this.eventPublisher = eventPublisher;
-    }
-
-    public List<Medicine> getAllMedicines() {
-        return medicineRepository.findAll();
-    }
-
-    public Medicine getMedicineById(UUID id) {
-        return medicineRepository.findById(id).orElse(null);
-    }
-
-    public Medicine saveMedicine(Medicine medicine) {
-        return medicineRepository.save(medicine);
-    }
-
-    public void deleteMedicine(UUID id) {
-        medicineRepository.deleteById(id);
+    public MedicineService(IMedicineRepository medicineRepository, StockEventPublisher stockEventPublisher) {
+        super(medicineRepository);
+        this.stockEventPublisher = stockEventPublisher;
     }
 
     public Medicine reduceStock(UUID id, int quantity) {
-        Medicine medicine = medicineRepository.findById(id)
+        Medicine medicine = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Medicine not found"));
 
         if (medicine.getStock() >= quantity) {
             medicine.setStock(medicine.getStock() - quantity);
-            return medicineRepository.save(medicine);
+            Medicine updatedMedicine = repository.save(medicine);
+            stockEventPublisher.checkAndPublishStockEvent(updatedMedicine);
+
+            return updatedMedicine;
         } else {
-
-            String message = String.format("Search petition : %s need %d units.",
-                    medicine.getName(), quantity - medicine.getStock());
-            eventPublisher.sendEvent("stock_request_queue", message);
-
             throw new RuntimeException("Insufficient stock. Searching for another branch.");
         }
     }
