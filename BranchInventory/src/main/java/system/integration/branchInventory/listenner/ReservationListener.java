@@ -8,7 +8,6 @@ import system.integration.branchInventory.service.BatchService;
 import system.integration.branchInventory.service.ReservationService;
 import system.integration.branchInventory.service.StockEventPublisher;
 
-public class ReservationListener {
 @Service
 
 public class ReservationListener {
