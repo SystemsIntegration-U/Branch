@@ -41,5 +41,14 @@ public class MedicineService extends GenericService<Medicine, UUID> {
             throw new RuntimeException("Insufficient stock. Searching for another branch.");
         }
     }
+    
+    public Medicine increaseStock(UUID id, int quantity) {
+        Medicine medicine = repository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Medicine not found"));
+
+        medicine.setStock(medicine.getStock() + quantity);
+        repository.save(medicine);
+        return medicine;
+    }
 }
 
