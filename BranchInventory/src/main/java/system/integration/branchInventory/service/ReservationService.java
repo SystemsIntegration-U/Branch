@@ -28,6 +28,22 @@ public class ReservationService {
         this.batchRepository = batchRepository;
     }
 
+    public List<Reservation> getAllReservations() {
+        return reservationRepository.findAll();
+    }
+
+    public Reservation getReservationById(UUID id) {
+        return reservationRepository.findById(id).orElse(null);
+    }
+
+    public Reservation saveReservation(Reservation reservation) {
+        return reservationRepository.save(reservation);
+    }
+
+    public void deleteReservation(UUID id) {
+        reservationRepository.deleteById(id);
+    }
+
     public Reservation createReservation(UUID medicineId, int requiredQuantity) {
         Reservation reservation = new Reservation();
         reservation.setReservationDate(LocalDateTime.now());
