@@ -24,7 +24,7 @@ public class ReservationListener {
     public void handleReservationRequest(StockAlertEventDTO request) {
         try {
             if (batchService.getAvailableStock(request.getMedicineId()) >= request.getRequiredQuantity()) {
-                Reservation reservation = reservationService.createReservation(request);
+                Reservation reservation = reservationService.createReservation(request.getMedicineId(), request.getRequiredQuantity());
                 batchService.reserveStock(reservation);
                 stockEventPublisher.sendEvent("reservation_confirmations_queue", reservation.getId().toString());
             } else {
@@ -35,4 +35,3 @@ public class ReservationListener {
         }
     }
 }    
-}
