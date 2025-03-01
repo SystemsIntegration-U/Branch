@@ -1,3 +1,3 @@
 rootProject.name = "branch"
 
-//include("SucursalGeneral", "Sucursal")
+include("GeneralBranch", "BranchInventory")
