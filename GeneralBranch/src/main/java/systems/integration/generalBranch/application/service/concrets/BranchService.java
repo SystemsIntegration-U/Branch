@@ -118,11 +118,9 @@ public class BranchService extends GenericService<Branch, UUID> implements IBran
                     .withName("specificbranch_" + dbName)
                     .exec();
 
-            System.out.println("Contenedor creado con ID: " + container.getId());
             dockerClient.startContainerCmd(container.getId()).exec();
-            System.out.println("Contenedor iniciado para " + dbName + " en puerto " + port);
         } catch (Exception e) {
-            System.err.println("Error al iniciar SpecificBranch: " + e.getMessage());
+            System.err.println("Error starting SpecificBranch: " + e.getMessage());
             e.printStackTrace();
         }
     }
