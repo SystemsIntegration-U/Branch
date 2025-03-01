@@ -15,6 +15,6 @@ public class BranchProducer implements IBaseProducer {
 
         channel.queueDeclare(queueName, true, false, false, null);
         channel.queueBind(queueName, "branch.subscription.exchange", "");
-        channel.basicPublish(queueName, "", null, event.getBody().getBytes());
+        channel.basicPublish("branch.subscription.exchange", "", null, event.getBody().getBytes());
     }
 }
