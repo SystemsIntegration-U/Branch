@@ -12,7 +12,6 @@ public class BatchMapper {
 
     public BatchDTO toDTO(Batch batch) {
         return new BatchDTO(
-                batch.getMedicine().getId(), 
                 batch.getExpiryDate(),
                 batch.getStock()
         );

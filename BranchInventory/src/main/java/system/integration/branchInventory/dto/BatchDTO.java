@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BatchDTO {
-    private UUID medicineId; 
     private LocalDate expiryDate;
     private int stock;
 }
