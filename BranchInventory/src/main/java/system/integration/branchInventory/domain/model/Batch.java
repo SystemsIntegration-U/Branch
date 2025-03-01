@@ -11,7 +11,6 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "batch")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class Batch {
 
