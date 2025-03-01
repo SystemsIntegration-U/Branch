@@ -5,12 +5,13 @@ import system.integration.branchInventory.domain.model.Batch;
 import system.integration.branchInventory.domain.model.Medicine;
 import system.integration.branchInventory.dto.BatchDTO;
 
+import java.util.UUID;
+
 @Component
 public class BatchMapper {
 
     public BatchDTO toDTO(Batch batch) {
         return new BatchDTO(
-                batch.getId(),
                 batch.getMedicine().getId(), 
                 batch.getExpiryDate(),
                 batch.getStock()
@@ -19,7 +20,7 @@ public class BatchMapper {
 
     public Batch toEntity(BatchDTO dto, Medicine medicine) {
         return new Batch(
-                dto.getId(),
+                UUID.randomUUID(),
                 medicine, 
                 dto.getExpiryDate(),
                 dto.getStock()
