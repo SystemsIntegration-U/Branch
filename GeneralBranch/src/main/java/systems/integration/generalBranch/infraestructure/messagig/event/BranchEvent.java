@@ -7,13 +7,11 @@ import lombok.Data;
 import systems.integration.generalBranch.domain.model.Location;
 
 @Data
-public class BranchCreateEvent implements IEvent {
+public class BranchEvent implements IEvent {
 
-    private Long gln;
     private Location location;
 
-    public BranchCreateEvent(Long gln, Location location) {
-        this.gln = gln;
+    public BranchEvent(Location location) {
         this.location = location;
     }
 

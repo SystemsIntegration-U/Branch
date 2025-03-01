@@ -7,5 +7,5 @@ import com.rabbitmq.client.Channel;
 import systems.integration.generalBranch.infraestructure.messagig.event.IEvent;
 
 public interface IBaseProducer {
-    void publish(String queueName, IEvent event, Channel channel) throws IOException, TimeoutException;
+    void publish(String queueName, String exchangeName, IEvent event, Channel channel) throws IOException, TimeoutException;
 }

@@ -10,11 +10,12 @@ import systems.integration.generalBranch.infraestructure.messagig.producer.inter
 
 public class BranchProducer implements IBaseProducer {
     @Override
-    public void publish(String queueName, IEvent event, Channel channel) throws IOException, TimeoutException {
-        channel.exchangeDeclare("branch.subscription.exchange", "fanout", true);
+    public void publish(String queueName, String exchangeName, IEvent event, Channel channel)
+            throws IOException, TimeoutException {
+        channel.exchangeDeclare(exchangeName, "fanout", true);
 
         channel.queueDeclare(queueName, true, false, false, null);
-        channel.queueBind(queueName, "branch.subscription.exchange", "");
-        channel.basicPublish("branch.subscription.exchange", "", null, event.getBody().getBytes());
+        channel.queueBind(queueName, exchangeName, "");
+        channel.basicPublish(exchangeName, "", null, event.getBody().getBytes());
     }
 }

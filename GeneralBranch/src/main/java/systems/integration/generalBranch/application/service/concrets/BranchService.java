@@ -14,7 +14,7 @@ import systems.integration.generalBranch.application.service.interfaces.IBranchS
 import systems.integration.generalBranch.domain.model.Branch;
 import systems.integration.generalBranch.domain.repository.interfaces.IBranchRepository;
 import systems.integration.generalBranch.infraestructure.messagig.config.RabbitMQConfig;
-import systems.integration.generalBranch.infraestructure.messagig.event.BranchCreateEvent;
+import systems.integration.generalBranch.infraestructure.messagig.event.BranchEvent;
 import systems.integration.generalBranch.infraestructure.messagig.producer.concrets.BranchProducer;
 import systems.integration.generalBranch.infraestructure.messagig.producer.interfaces.IBaseProducer;
 import systems.integration.generalBranch.utils.DatabaseCreator;
@@ -67,8 +67,9 @@ public class BranchService extends GenericService<Branch, UUID> implements IBran
     private void publishCreateBrancchEvent(Branch branch) {
         try {
             com.rabbitmq.client.Connection connection = RabbitMQConfig.getConnection();
-            BranchCreateEvent event = new BranchCreateEvent(branch.getGln(), branch.getLocation());
-            producer.publish("branch.subscription.queue", event, connection.createChannel());
+            BranchEvent event = new BranchEvent(branch.getLocation());
+            producer.publish("branch.subscription.queue",
+                    "branch.subscription.exchange", event, connection.createChannel());
             connection.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -98,6 +99,7 @@ public class BranchService extends GenericService<Branch, UUID> implements IBran
                     String dbName = "branch_" + gln;
 
                     branchRepository.deleteById(branch.getId());
+                    publishDeleteBrancchEvent(branch);
 
                     stopAndRemoveContainer(containerName);
 
@@ -105,6 +107,22 @@ public class BranchService extends GenericService<Branch, UUID> implements IBran
 
                     return true;
                 }).orElse(false);
+    }
+
+    private void publishDeleteBrancchEvent(Branch branch) {
+        try {
+            com.rabbitmq.client.Connection connection = RabbitMQConfig.getConnection();
+            BranchEvent event = new BranchEvent(branch.getLocation());
+            producer.publish("branch.unsubscription.queue", "branch.subscription.exchange", event,
+                    connection.createChannel());
+            connection.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
 
     private int findNextAvailablePort() {
@@ -171,7 +189,7 @@ public class BranchService extends GenericService<Branch, UUID> implements IBran
 
     private void dropDatabase(String dbName) {
         try (Connection conn = DriverManager.getConnection(POSTGRES_URL, POSTGRES_USER, POSTGRES_PASSWORD);
-             Statement stmt = conn.createStatement()) {
+                Statement stmt = conn.createStatement()) {
             stmt.execute("SELECT pg_terminate_backend(pg_stat_activity.pid) " +
                     "FROM pg_stat_activity " +
                     "WHERE pg_stat_activity.datname = '" + dbName + "' AND pid <> pg_backend_pid()");
