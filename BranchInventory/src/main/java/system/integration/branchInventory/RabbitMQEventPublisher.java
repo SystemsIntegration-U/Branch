@@ -20,9 +20,6 @@ public class RabbitMQEventPublisher {
         this.objectMapper = objectMapper;
     }
 
-    /**
-     * Envía un evento genérico a RabbitMQ.
-     */
     public void sendEvent(String queueName, Object eventData) {
         try {
             String message = objectMapper.writeValueAsString(eventData);

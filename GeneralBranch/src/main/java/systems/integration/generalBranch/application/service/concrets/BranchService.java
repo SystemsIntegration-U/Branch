@@ -41,7 +41,7 @@ public class BranchService extends GenericService<Branch, UUID> implements IBran
     public Branch save(Branch branch) {
         int nextPort = findNextAvailablePort();
         if (nextPort > MAX_PORT) {
-            throw new RuntimeException("No hay más puertos disponibles en el rango 8000-8079");
+            throw new RuntimeException("There are no more ports available in the range 8000-8079");
         }
         branch.setPort(nextPort);
 
@@ -70,17 +70,13 @@ public class BranchService extends GenericService<Branch, UUID> implements IBran
     public boolean deleteByGln(Long gln) {
         return branchRepository.findByGln(gln)
                 .map(branch -> {
-                    // Nombre del contenedor y base de datos
                     String containerName = "specificbranch_branch_" + gln;
                     String dbName = "branch_" + gln;
 
-                    // Eliminar el registro de la base de datos principal
                     branchRepository.deleteById(branch.getId());
 
-                    // Detener y eliminar el contenedor
                     stopAndRemoveContainer(containerName);
 
-                    // Eliminar la base de datos específica
                     dropDatabase(dbName);
 
                     return true;
@@ -97,7 +93,6 @@ public class BranchService extends GenericService<Branch, UUID> implements IBran
 
     public void startSpecificBranchInstance(String dbName, int port) {
         try {
-            System.out.println("Iniciando creación de contenedor para " + dbName + " en puerto " + port);
             DefaultDockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
                     .withDockerHost("unix:///var/run/docker.sock")
                     .build();
@@ -142,15 +137,11 @@ public class BranchService extends GenericService<Branch, UUID> implements IBran
                     .withDockerCmdExecFactory(new NettyDockerCmdExecFactory())
                     .build();
 
-            // Detener el contenedor si está corriendo
             dockerClient.stopContainerCmd(containerName).withTimeout(10).exec();
-            System.out.println("Contenedor " + containerName + " detenido");
 
-            // Eliminar el contenedor
             dockerClient.removeContainerCmd(containerName).exec();
-            System.out.println("Contenedor " + containerName + " eliminado");
         } catch (Exception e) {
-            System.err.println("Error al detener/eliminar contenedor " + containerName + ": " + e.getMessage());
+            System.err.println("Error stopping/deleting container " + containerName + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -158,16 +149,13 @@ public class BranchService extends GenericService<Branch, UUID> implements IBran
     private void dropDatabase(String dbName) {
         try (Connection conn = DriverManager.getConnection(POSTGRES_URL, POSTGRES_USER, POSTGRES_PASSWORD);
              Statement stmt = conn.createStatement()) {
-            // Terminar todas las conexiones activas a la base de datos
             stmt.execute("SELECT pg_terminate_backend(pg_stat_activity.pid) " +
                     "FROM pg_stat_activity " +
                     "WHERE pg_stat_activity.datname = '" + dbName + "' AND pid <> pg_backend_pid()");
 
-            // Eliminar la base de datos
             stmt.execute("DROP DATABASE IF EXISTS " + dbName);
-            System.out.println("Base de datos " + dbName + " eliminada exitosamente");
         } catch (SQLException e) {
-            System.err.println("Error al eliminar la base de datos " + dbName + ": " + e.getMessage());
+            System.err.println("Error deleting database " + dbName + ": " + e.getMessage());
             e.printStackTrace();
         }
     }

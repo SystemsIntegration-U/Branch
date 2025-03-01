@@ -1,4 +1,3 @@
 rootProject.name = "branch"
 
-include("GeneralBranch")
-include("BranchInventory")
+include("GeneralBranch", "BranchInventory")

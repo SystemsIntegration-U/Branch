@@ -19,27 +19,20 @@ repositories {
 }
 
 dependencies {
-	// Spring Boot
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter:3.4.0")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-amqp") // RabbitMQ
-
-	// PostgreSQL
+	implementation("org.springframework.boot:spring-boot-starter-amqp")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("com.fasterxml.jackson.core:jackson-databind:2.15.3")
 	runtimeOnly("org.postgresql:postgresql")
-
-	// Lombok
 	compileOnly("org.projectlombok:lombok:1.18.32")
 	annotationProcessor("org.projectlombok:lombok:1.18.32")
-
-	// Validación de datos
-	implementation("org.springframework.boot:spring-boot-starter-validation")
-
-	// Serialización JSON
-	implementation("com.fasterxml.jackson.core:jackson-databind:2.15.3")
-
-	// Testing
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testImplementation("org.mockito:mockito-core")
+	testImplementation("org.mockito:mockito-junit-jupiter")
 }
 
 tasks.withType<Test> {
