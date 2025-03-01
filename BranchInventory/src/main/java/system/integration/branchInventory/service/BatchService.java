@@ -35,17 +35,25 @@ public class BatchService extends GenericService<Batch, UUID>  {
     }
 
     public BatchDTO saveBatch(BatchDTO batchDTO) {
-        Medicine medicine = medicineRepository.findById(batchDTO.getMedicineId())
-                .orElseThrow(() -> new RuntimeException("Medicine not found"));
-    
-        Batch batch = batchMapper.toEntity(batchDTO, medicine);
+        Batch existingBatch = repository.findAll().stream()
+                .filter(batch -> batch.getExpiryDate().equals(batchDTO.getExpiryDate()))
+                .findFirst()
+                .orElse(null);
+
+        if (existingBatch == null) {
+            throw new RuntimeException("Batch must be associated with a Medicine.");
+        }
+
+        Medicine medicine = existingBatch.getMedicine();
+
+        Batch batch = new Batch(null, medicine, batchDTO.getExpiryDate(), batchDTO.getStock());
         medicine.setStock(medicine.getStock() + batch.getStock());
         medicineRepository.save(medicine);
-    
+
         Batch savedBatch = save(batch);
-    
-        return batchMapper.toDTO(savedBatch); 
+        return new BatchDTO(savedBatch.getExpiryDate(), savedBatch.getStock());
     }
+
 
 
     public List<Batch> getAvailableBatches() {
