@@ -51,7 +51,7 @@ Upload and run the containers defined in the docker-compose file.
 ```
 docker-compose up
 ```
-
+---
 If you have a docker created from the branch before then follow these commands:
 
 Stop and remove containers and associated volumes.
@@ -78,7 +78,7 @@ Restarts the containers with the new configuration.
 ```
 docker-compose up
 ```
-
+---
 When running docker, check if it is started with:
 
 Shows the running Docker containers to verify that they are active and on which ports.
@@ -130,3 +130,16 @@ CONTAINER ID    IMAGE                   COMMAND                 CREATED         
 8c1595ab8c29    branch_generalbranch    "java -jar app.jar"     2 minutes ago        Up 2 minutes   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp     branch_generalbranch_1
 93dfeadff6cc    postgres:latest         "docker-entrypoint.s…"  2 minutes ago        Up 2 minutes   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp     branch_postgres_1
 ```
+---
+## Project Infrastructure
+![Project-Infrastructure](https://i.ibb.co/ymwc6vvb/Project-Infrastructure.png)
+
+## Use Case Diagram
+![Project-Infrastructure](https://i.ibb.co/6RhPchGj/Use-Case-Diagram.png)
+
+## Sequence Diagram
+![Project-Infrastructure](https://i.ibb.co/b50RWdBT/Sequence-Diagram.png)
+
+---
+This is the link where the diagrams were made in case you can't see the images well.
+https://drive.google.com/file/d/1cdwsFgX6Mthoo2TmVSOsGyl0s5SLRtAh/view?usp=sharing
