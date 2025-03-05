@@ -140,6 +140,9 @@ CONTAINER ID    IMAGE                   COMMAND                 CREATED         
 ## Sequence Diagram
 ![Project-Infrastructure](https://i.ibb.co/b50RWdBT/Sequence-Diagram.png)
 
+## Architecture Diagram
+![Architecture](https://i.ibb.co/HTTVndfQ/Architecture.png)
+
 ---
 This is the link where the diagrams were made in case you can't see the images well.
 https://drive.google.com/file/d/1cdwsFgX6Mthoo2TmVSOsGyl0s5SLRtAh/view?usp=sharing
