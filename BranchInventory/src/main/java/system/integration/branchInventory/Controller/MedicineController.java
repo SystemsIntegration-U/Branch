@@ -31,13 +31,13 @@ public class MedicineController {
         return medicineService.saveMedicine(medicine);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteMedicine(@PathVariable UUID id) {
-        medicineService.deleteMedicine(id);
+    @DeleteMapping("/{atc}")
+    public void deleteMedicine(@PathVariable String atc) {
+        medicineService.deleteMedicineByAtc(atc);
     }
 
-    @PostMapping("/{id}/reduce-stock")
-    public Medicine reduceStock(@PathVariable UUID id, @RequestParam int quantity) {
-        return medicineService.reduceStock(id, quantity);
+    @PostMapping("/{atc}/reduce-stock")
+    public Medicine reduceStock(@PathVariable String atc, @RequestParam int quantity) {
+        return medicineService.reduceStockByAtc(atc, quantity);
     }
 }
